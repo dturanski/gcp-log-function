@@ -20,29 +20,34 @@ import java.util.function.Function;
 
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author David Turanski
  **/
-@SpringBootApplication
-public class LogApp {
+@SpringBootTest
+@RunWith(SpringRunner.class)
+public class LogTest {
 
-	@Bean
-	public Function<PubsubMessage, String> log() {
-		return message -> {
-			System.out.println(message);
-			String result = new String(message.getData().toByteArray());
-			System.out.println("Received: " + result);
-			return result;
-		};
-	}
+	@Autowired
+	private Function<PubsubMessage, String> log;
 
-	public static void main(String[] args) {
-		SpringApplication.run(LogApp.class, args);
+	@Test
+	public void test() {
+		PubsubMessage message = PubsubMessage.newBuilder()
+			.setData(ByteString.copyFrom("hello,world!", UTF_8))
+			.build();
+
+		log.apply(message);
+
 	}
 
 }
