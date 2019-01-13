@@ -16,6 +16,7 @@
 
 package functions;
 
+import java.util.Map;
 import java.util.function.Function;
 
 import com.google.protobuf.ByteString;
@@ -32,12 +33,11 @@ import org.springframework.context.annotation.Bean;
 public class LogApp {
 
 	@Bean
-	public Function<PubsubMessage, String> log() {
+	public Function<Map, String> log() {
 		return message -> {
 			System.out.println(message);
-			String result = new String(message.getData().toByteArray());
-			System.out.println("Received: " + result);
-			return result;
+			System.out.println("Received: " + message);
+			return message.toString();
 		};
 	}
 

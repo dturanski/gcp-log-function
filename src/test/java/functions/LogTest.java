@@ -16,8 +16,13 @@
 
 package functions;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
 import org.junit.Test;
@@ -25,7 +30,6 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -38,7 +42,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class LogTest {
 
 	@Autowired
-	private Function<PubsubMessage, String> log;
+	private Function<Map, String> log;
+
+	@Autowired
+	ObjectMapper objectMapper;
 
 	@Test
 	public void test() {
@@ -46,7 +53,15 @@ public class LogTest {
 			.setData(ByteString.copyFrom("hello,world!", UTF_8))
 			.build();
 
-		log.apply(message);
+		Gson gson = new Gson();
+
+		String json = gson.toJson(message);
+
+		System.out.println(json);
+
+		Map map = gson.fromJson(json, HashMap.class);
+
+		log.apply(map);
 
 	}
 
