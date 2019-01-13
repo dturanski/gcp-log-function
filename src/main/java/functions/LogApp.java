@@ -20,7 +20,6 @@ import java.util.function.Function;
 
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
-import io.cloudevents.impl.DefaultCloudEventImpl;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
