@@ -33,13 +33,47 @@ import org.springframework.context.annotation.Bean;
 public class LogApp {
 
 	@Bean
-	public Function<Map, String> log() {
-		return message -> {
-			System.out.println(message);
-			System.out.println("Received: " + message);
-			return message.toString();
+	public Function<User, String> printUser() {
+		return user -> {
+			System.out.println(user);
+			return user.toString();
 		};
 	}
+
+
+	public static class User {
+
+		public User(String userid, String changedate) {
+			this.userid = userid;
+			this.changedate = changedate;
+		}
+
+		public User() {
+		}
+		public String getUserid() {
+			return userid;
+		}
+		public void setUserid(String userid) {
+			this.userid = userid;
+		}
+		public String getChangedate() {
+			return changedate;
+		}
+		public void setChangedate(String changedate) {
+			this.changedate = changedate;
+		}
+		@Override
+		public String toString() {
+			return "User{" +
+				"userid='" + userid + '\'' +
+				", changedate='" + changedate + '\'' +
+				'}';
+		}
+		private String userid;
+		private String changedate;
+
+	}
+
 
 	public static void main(String[] args) {
 		SpringApplication.run(LogApp.class, args);

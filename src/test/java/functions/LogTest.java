@@ -16,52 +16,73 @@
 
 package functions;
 
-import java.util.HashMap;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Map;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.protobuf.ByteString;
-import com.google.pubsub.v1.PubsubMessage;
+import functions.LogApp.User;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author David Turanski
  **/
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 public class LogTest {
 
 	@Autowired
-	private Function<Map, String> log;
+	@Qualifier("printUser")
+	private Function<User, String> printUser;
 
 	@Autowired
 	ObjectMapper objectMapper;
 
 	@Test
-	public void test() {
-		PubsubMessage message = PubsubMessage.newBuilder()
-			.setData(ByteString.copyFrom("hello,world!", UTF_8))
-			.build();
+	public void test() throws JsonProcessingException {
 
+		User user = new User("123", "01/14/19");
+		byte[] bytes = objectMapper.writeValueAsBytes(user);
+
+		Reader reader = new InputStreamReader(new ByteArrayInputStream(bytes));
 		Gson gson = new Gson();
+		User user1 = gson.fromJson(reader, User.class);
+		assertThat(user1.getUserid()).isEqualTo(user.getUserid());
+		assertThat(user1.getChangedate()).isEqualTo(user.getChangedate());
 
-		String json = gson.toJson(message);
+		user1 = gson.fromJson(new String(bytes), User.class);
+		assertThat(user1.getUserid()).isEqualTo(user.getUserid());
+		assertThat(user1.getChangedate()).isEqualTo(user.getChangedate());
+	}
 
-		System.out.println(json);
+	@Test
+	@Ignore
+	public void http() {
+		RestTemplate restTemplate = new RestTemplate();
 
-		Map map = gson.fromJson(json, HashMap.class);
+		User user = new User("123", "01/14/19");
 
-		log.apply(map);
+		ResponseEntity<String> responseEntity = restTemplate.exchange("http://localhost:8080/printUser",
+			HttpMethod.POST, new HttpEntity(user), String.class);
+
+		assertThat(responseEntity.getBody()).isEqualTo(user.toString());
 
 	}
 
